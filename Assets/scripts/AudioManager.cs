@@ -8,7 +8,7 @@ public class AudioManager : MonoBehaviour
     public AudioSource fire;
     public AudioSource hit;
     public AudioSource pause;
-    public AudioSource unpause;
+    public AudioSource unpause; 
     void Awake()
     {
         if (Instance != null)

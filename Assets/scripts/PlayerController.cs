@@ -49,20 +49,26 @@ public class PlayerController : MonoBehaviour
         if(Time.timeScale > 0)
         {
             
-        float directionX = Input.GetAxisRaw("Horizontal");
-        float directionY = Input.GetAxisRaw("Vertical");
-        animator.SetFloat("moveX", directionX);
-        animator.SetFloat("moveY", directionY);
-        playerDirection = new Vector2(directionX, directionY).normalized;
+            float directionX = Input.GetAxisRaw("Horizontal");
+            float directionY = Input.GetAxisRaw("Vertical");
+            animator.SetFloat("moveX", directionX);
+            animator.SetFloat("moveY", directionY);
+            playerDirection = new Vector2(directionX, directionY).normalized;
 
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetButtonDown("Fire2"))
-        {
-            EnterBoost();
-        }else if (Input.GetKeyUp(KeyCode.Space) || Input.GetButtonUp("Fire2"))
-        {
-            ExitBoost();
+            if (Input.GetKeyDown(KeyCode.Space) || Input.GetButtonDown("Fire2"))
+            {
+                EnterBoost();
+            }
+            else if (Input.GetKeyUp(KeyCode.Space) || Input.GetButtonUp("Fire2"))
+            {
+                ExitBoost();
+            }
+            if(Input.GetKeyDown(KeyCode.RightShift) || Input.GetButtonDown("Fire1"))
+            {
+                PhaserWeapon.Instance.Shoot();
+            } 
         }
-        }
+        
     }
     void FixedUpdate()
     {

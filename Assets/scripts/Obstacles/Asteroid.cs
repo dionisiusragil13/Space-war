@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Asteroid : MonoBehaviour
@@ -22,11 +23,24 @@ public class Asteroid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float moveX = (GameManager.Instance.worldSpeed * PlayerController.Instance.boost)  * Time.deltaTime;
+        float moveX = (GameManager.Instance.worldSpeed * PlayerController.Instance.boost) * Time.deltaTime;
         transform.position += new Vector3(-moveX, 0);
-        if(transform.position.x < -11)
+        if (transform.position.x < -11)
         {
             Destroy(gameObject);
         }
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Bullet"))
+        {
+            spriteRenderer.material = whiteMaterial;
+            StartCoroutine("ResetMaterial");
+        }
+    }
+    IEnumerator ResetMaterial()
+    {
+        yield return new WaitForSeconds(0.2f);
+        spriteRenderer.material = defaultMaterial;
     }
 }
