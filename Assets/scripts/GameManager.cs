@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
     public float worldSpeed;
+    public int critterCounter;
+    [SerializeField] private GameObject boss1;
 
     void Awake()
     {
@@ -18,11 +20,20 @@ public class GameManager : MonoBehaviour
             Instance = this;
         }
     }
+    void Start()
+    {
+        critterCounter = 0;
+    }
     void Update()
     {
         if(Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P) || Input.GetButtonDown("Fire3"))
         {
             Pause();
+        }
+        if(critterCounter > 10)
+        {
+            critterCounter = 0;
+            Instantiate(boss1, new Vector2(15f,0), Quaternion.Euler(0,0,-90));
         }
     }
     public void Pause()
@@ -57,5 +68,10 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(3);
         SceneManager.LoadScene("GameOver");
+    }
+
+    public void SetWorldSpeed(float speed)
+    {
+        worldSpeed = speed;
     }
 }

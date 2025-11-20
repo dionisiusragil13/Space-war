@@ -27,7 +27,7 @@ public class Asteroid : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float moveX = (GameManager.Instance.worldSpeed * PlayerController.Instance.boost) * Time.deltaTime;
+        float moveX = GameManager.Instance.worldSpeed * Time.deltaTime;
         transform.position += new Vector3(-moveX, 0);
         if (transform.position.x < -11)
         {
@@ -38,16 +38,23 @@ public class Asteroid : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Bullet"))
         {
-            spriteRenderer.material = whiteMaterial;
-            StartCoroutine("ResetMaterial");
-            AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.hitRock);
-            lives--;
-            if (lives <= 0)
-            {
-                Instantiate(destroyEffect,transform.position,transform.rotation);
-                AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.boom2);
-                Destroy(gameObject);
-            }
+            TakeDamage(1);
+        }else if (collision.gameObject.CompareTag("Boss"))
+        {
+            TakeDamage(10);
+        }
+    }
+    public void TakeDamage(int damage)
+    {
+        spriteRenderer.material = whiteMaterial;
+        StartCoroutine("ResetMaterial");
+        AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.hitRock);
+        lives-=damage;
+        if (lives <= 0)
+        {
+            Instantiate(destroyEffect,transform.position,transform.rotation);
+            AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.boom2);
+            Destroy(gameObject);
         }
     }
     IEnumerator ResetMaterial()

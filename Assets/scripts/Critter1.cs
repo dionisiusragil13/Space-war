@@ -5,6 +5,7 @@ public class Critter1 : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     [SerializeField] private Sprite[] sprites;
     [SerializeField] private GameObject zappedEffect;
+    [SerializeField] private GameObject burnEffect;
     private Vector3 targetPosition;
     private Quaternion targetRotation;
     private float moveSpeed;
@@ -41,7 +42,7 @@ public class Critter1 : MonoBehaviour
             targetRotation = Quaternion.LookRotation(Vector3.forward,relativePos);
             transform.rotation = Quaternion.RotateTowards(transform.rotation,targetRotation,1080 * Time.deltaTime);
         }
-        float moveX = (GameManager.Instance.worldSpeed * PlayerController.Instance.boost) * Time.deltaTime;
+        float moveX = GameManager.Instance.worldSpeed * Time.deltaTime;
         transform.position += new Vector3(-moveX,0);
          if (transform.position.x < -11)
         {
@@ -61,6 +62,13 @@ public class Critter1 : MonoBehaviour
             Instantiate(zappedEffect, transform.position, transform.rotation);
             Destroy(gameObject);
             AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.squished);
+            GameManager.Instance.critterCounter ++;
+        } else if (collision.gameObject.CompareTag("Player"))
+        {
+            Instantiate(burnEffect, transform.position, transform.rotation);
+            Destroy(gameObject);
+            GameManager.Instance.critterCounter ++;
+            AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.burn);
         }
     }
 }
