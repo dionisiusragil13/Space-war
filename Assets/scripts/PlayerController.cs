@@ -20,6 +20,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float health;
     [SerializeField] private float maxHealth;
     [SerializeField] private GameObject destroyEffect;
+    [SerializeField] private ParticleSystem engineEffect;
 
     void Awake() {
         if(Instance != null)
@@ -98,6 +99,7 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("boosting", true);
             boost = boostPower;
             boosting = true;
+            engineEffect.Play();
         }   
     }
     public void ExitBoost()

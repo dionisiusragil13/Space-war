@@ -8,7 +8,11 @@ public class AudioManager : MonoBehaviour
     public AudioSource fire;
     public AudioSource hit;
     public AudioSource pause;
-    public AudioSource unpause; 
+    public AudioSource unpause;
+    public AudioSource boom2;
+    public AudioSource hitRock;
+    public AudioSource shoot; 
+    public AudioSource squished; 
     void Awake()
     {
         if (Instance != null)
@@ -22,6 +26,12 @@ public class AudioManager : MonoBehaviour
     }
     public void PlaySound(AudioSource sound)
     {
+        sound.Stop();
+        sound.Play();
+    }
+    public void PlayModifiedSound(AudioSource sound)
+    {
+        sound.pitch = Random.Range(0.7f,1.3f);
         sound.Stop();
         sound.Play();
     }
