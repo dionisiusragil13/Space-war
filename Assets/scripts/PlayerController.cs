@@ -6,12 +6,10 @@ public class PlayerController : MonoBehaviour
     public static PlayerController Instance;
     private Rigidbody2D rb;
     private Animator animator;
-    private SpriteRenderer spriteRenderer;
-    private Material defaultMaterial;
-    [SerializeField] private Material whiteMaterial;
+    private FlashWhite flashWhite;
     private Vector2 playerDirection;
     [SerializeField] private float moveSpeed;
-    private bool boosting = false;
+    public bool boosting = false;
     [SerializeField] private float energy;
     [SerializeField] private float maxEnergy;
     [SerializeField] private float energyRegen;
@@ -34,8 +32,7 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
-        defaultMaterial = spriteRenderer.material;
+        flashWhite = GetComponent<FlashWhite>();
         energy = maxEnergy;
         UIController.Instance.UpdateEnergySlider(energy, maxEnergy);
         health = maxHealth;
@@ -110,20 +107,16 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Obstacle"))
         {
-            TakeDamage(1);
-            AudioManager.Instance.PlaySound(AudioManager.Instance.hit);
-        }else if (collision.gameObject.CompareTag("Boss"))
-        {
-            TakeDamage(5);
+            Asteroid asteroid = collision.gameObject.GetComponent<Asteroid>();
+            if(asteroid) asteroid.TakeDamage(1);
         }
     }
-    private void TakeDamage(int damage)
+    public void TakeDamage(int damage)
     {
         health -= damage;
         UIController.Instance.UpdateHealthSlider(health, maxHealth);
         AudioManager.Instance.PlaySound(AudioManager.Instance.hit);
-        spriteRenderer.material = whiteMaterial;
-        StartCoroutine("ResetMaterial");
+        flashWhite.Flash();
         if (health <= 0)
         {
             ExitBoost();
@@ -134,9 +127,5 @@ public class PlayerController : MonoBehaviour
             AudioManager.Instance.PlaySound(AudioManager.Instance.ice);
         }
     }
-    IEnumerator ResetMaterial()
-    {
-        yield return new WaitForSeconds(0.2f);
-        spriteRenderer.material = defaultMaterial;
-    }
+
 }

@@ -4,17 +4,17 @@ using UnityEngine;
 public class Asteroid : MonoBehaviour
 {
     private SpriteRenderer spriteRenderer;
-    private Material defaultMaterial;
-    [SerializeField] private Material whiteMaterial;
+    private FlashWhite flashWhite;
     [SerializeField] private GameObject destroyEffect;
-    [SerializeField] private int lives;
+    private int lives;
+    private int damage;
     private Rigidbody2D rb;
     [SerializeField] private Sprite[] sprites;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        defaultMaterial = spriteRenderer.material;
+        flashWhite = GetComponent<FlashWhite>();
         spriteRenderer.sprite = sprites[Random.Range(0, sprites.Length)];
         rb = GetComponent<Rigidbody2D>();
         float pushX = Random.Range(-1f, 0);
@@ -22,33 +22,24 @@ public class Asteroid : MonoBehaviour
         rb.linearVelocity = new Vector2(pushX, pushY);
         float randomScale = Random.Range(0.6f,1f);
         transform.localScale = new Vector2(randomScale,randomScale);
+        lives = 5;
+        damage = 1;
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        float moveX = GameManager.Instance.worldSpeed * Time.deltaTime;
-        transform.position += new Vector3(-moveX, 0);
-        if (transform.position.x < -11)
-        {
-            Destroy(gameObject);
-        }
-    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Bullet"))
+        if (collision.gameObject.CompareTag("Player"))
         {
-            TakeDamage(1);
-        }else if (collision.gameObject.CompareTag("Boss"))
-        {
-            TakeDamage(10);
+            PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+            if(player) player.TakeDamage(damage);
         }
     }
     public void TakeDamage(int damage)
     {
-        spriteRenderer.material = whiteMaterial;
-        StartCoroutine("ResetMaterial");
         AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.hitRock);
+        flashWhite.Flash();
         lives-=damage;
         if (lives <= 0)
         {
@@ -57,9 +48,5 @@ public class Asteroid : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    IEnumerator ResetMaterial()
-    {
-        yield return new WaitForSeconds(0.2f);
-        spriteRenderer.material = defaultMaterial;
-    }
+
 }

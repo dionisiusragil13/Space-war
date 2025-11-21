@@ -10,23 +10,27 @@ public class Boss1 : MonoBehaviour
     private float switchInterval;
     private float switchTimer;
     private int lives;
+    private int damage;
     void Start()
     {
         animator = GetComponent<Animator>();
         EnterChargeState();
         lives = 20;
+        damage = 2;
+        AudioManager.Instance.PlaySound(AudioManager.Instance.bossSpawn);
     }
 
     // Update is called once per frame
     void Update()
     {
+        float playerPosition = PlayerController.Instance.transform.position.x;
         if (switchTimer > 0 )
         {
             switchTimer -= Time.deltaTime;
         }
         else
         {
-            if (charging)
+            if (charging && transform.position.x > playerPosition)
             {
                 EnterPatrolState();
             }
@@ -38,8 +42,21 @@ public class Boss1 : MonoBehaviour
         if (transform.position.y >3 || transform.position.y < -3)
         {
             speedY *= -1;
+        }else if (transform.position.x < playerPosition)
+        {
+            EnterChargeState();
         }
-        float moveX = speedX * Time.deltaTime;
+
+        bool boost = PlayerController.Instance.boosting;
+        float moveX;
+        if(boost && !charging)
+        {
+            moveX = GameManager.Instance.worldSpeed * Time.deltaTime * -0.5f;
+        }
+        else
+        {
+            moveX = speedX * Time.deltaTime;
+        }
         float moveY = speedY * Time.deltaTime;
 
         transform.position += new Vector3(moveX,moveY);
@@ -59,13 +76,25 @@ public class Boss1 : MonoBehaviour
     }
     void EnterChargeState()
     {
-        speedX = -5f;
+        if (!charging) AudioManager.Instance.PlaySound(AudioManager.Instance.bossCharge);
+        speedX = -10f;
         speedY = 0;
-        switchInterval = Random.Range(2f,2.5f);
+        switchInterval = Random.Range(0.6f,1.3f);
         switchTimer = switchInterval;
         charging = true;
         animator.SetBool("Charging",true);
-        AudioManager.Instance.PlaySound(AudioManager.Instance.bossCharge);
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            PlayerController player = collision.gameObject.GetComponent<PlayerController>();
+            if(player) player.TakeDamage(damage);
+        } else if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            Asteroid asteroid = collision.gameObject.GetComponent<Asteroid>();
+            if(asteroid) asteroid.TakeDamage(damage);
+        }
     }
     public void TakeDamage(int damage)
     {
@@ -73,11 +102,4 @@ public class Boss1 : MonoBehaviour
         lives -=damage;
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if(collision.gameObject.CompareTag("Bullet"))
-        {
-            TakeDamage(0);
-        }
-    }
 }
