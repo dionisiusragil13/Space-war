@@ -5,25 +5,33 @@ public class Asteroid : MonoBehaviour
 {
     private SpriteRenderer spriteRenderer;
     private FlashWhite flashWhite;
-    [SerializeField] private GameObject destroyEffect;
+    private ObjectPooler destroyEffectPool;
     private int lives;
-    private int damage;
+    private  int maxLives = 5;
+    private int damage = 1;
+    private int experienceToGive = 5;
     private Rigidbody2D rb;
     [SerializeField] private Sprite[] sprites;
+    float pushX;
+    float pushY;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void OnEnable()
+    {
+        lives = maxLives;
+        transform.rotation = Quaternion.identity;
+        pushX = Random.Range(-1f, 0);
+        pushY = Random.Range(-1f, 1);
+        if (rb) rb.linearVelocity = new Vector2(pushX, pushY);
+    }
     void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         flashWhite = GetComponent<FlashWhite>();
-        spriteRenderer.sprite = sprites[Random.Range(0, sprites.Length)];
         rb = GetComponent<Rigidbody2D>();
-        float pushX = Random.Range(-1f, 0);
-        float pushY = Random.Range(-1f, 1);
-        rb.linearVelocity = new Vector2(pushX, pushY);
+        destroyEffectPool = GameObject.Find("Boom2Pool").GetComponent<ObjectPooler>();
+        spriteRenderer.sprite = sprites[Random.Range(0, sprites.Length)];
         float randomScale = Random.Range(0.6f,1f);
         transform.localScale = new Vector2(randomScale,randomScale);
-        lives = 5;
-        damage = 1;
     }
 
     // Update is called once per frame
@@ -36,16 +44,24 @@ public class Asteroid : MonoBehaviour
             if(player) player.TakeDamage(damage);
         }
     }
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, bool giveExperience)
     {
         AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.hitRock);
-        flashWhite.Flash();
         lives-=damage;
-        if (lives <= 0)
-        {
-            Instantiate(destroyEffect,transform.position,transform.rotation);
+        if(lives > 0)
+        { 
+        flashWhite.Flash();
+        }else{
+            GameObject destroyEffect = destroyEffectPool.GetPooledObject();
+            destroyEffect.transform.position = transform.position;
+            destroyEffect.transform.rotation = transform.rotation;
+            destroyEffect.transform.localScale = transform.localScale;
+            destroyEffect.SetActive(true);
+            //Instantiate(destroyEffect,transform.position,transform.rotation);
             AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.boom2);
-            Destroy(gameObject);
+            flashWhite.Reset();
+            gameObject.SetActive(false);
+            if (giveExperience) PlayerController.Instance.GetExperience(experienceToGive);
         }
     }
 

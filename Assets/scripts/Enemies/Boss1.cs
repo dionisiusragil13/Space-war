@@ -4,20 +4,30 @@ public class Boss1 : MonoBehaviour
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     private Animator animator;
+    private ObjectPooler destroyEffectPool;
     private float speedX;
     private float speedY;
     private bool charging;
     private float switchInterval;
     private float switchTimer;
     private int lives;
-    private int damage;
-    void Start()
+    private int maxLives = 5;
+    private int damage = 20;
+    private int experienceToGive = 10;
+
+    void Awake()
     {
         animator = GetComponent<Animator>();
+    }
+    void OnEnable()
+    {
+        lives = maxLives;
         EnterChargeState();
-        lives = 20;
-        damage = 2;
         AudioManager.Instance.PlaySound(AudioManager.Instance.bossSpawn);
+    }
+    void Start()
+    {
+        destroyEffectPool = GameObject.Find("Boom3Pool").GetComponent<ObjectPooler>();
     }
 
     // Update is called once per frame
@@ -62,7 +72,7 @@ public class Boss1 : MonoBehaviour
         transform.position += new Vector3(moveX,moveY);
         if(transform.position.x < -11)
         {
-            Destroy(gameObject);
+           gameObject.SetActive(false);
         }
     }
     void EnterPatrolState()
@@ -93,13 +103,22 @@ public class Boss1 : MonoBehaviour
         } else if (collision.gameObject.CompareTag("Obstacle"))
         {
             Asteroid asteroid = collision.gameObject.GetComponent<Asteroid>();
-            if(asteroid) asteroid.TakeDamage(damage);
+            if(asteroid) asteroid.TakeDamage(damage,false);
         }
     }
     public void TakeDamage(int damage)
     {
         AudioManager.Instance.PlaySound(AudioManager.Instance.hitArmor);
         lives -=damage;
+        if(lives <=0) {
+            GameObject destroyEffect = destroyEffectPool.GetPooledObject();
+            destroyEffect.transform.position = transform.position;
+            destroyEffect.transform.rotation = transform.rotation;
+            destroyEffect.SetActive(true);
+            AudioManager.Instance.PlayModifiedSound(AudioManager.Instance.boom2);
+            gameObject.SetActive(false);
+            PlayerController.Instance.GetExperience(experienceToGive);
+        }
     }
 
 }
